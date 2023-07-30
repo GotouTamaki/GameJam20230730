@@ -16,6 +16,10 @@ public class enemyMove : MonoBehaviour
     [SerializeField] Animator _animator;
     /// <summary>‹È‚ª‚é•ûŒü</summary>
     bool _isMove;
+    [SerializeField] int _enemyHp = 2;
+    float _enemyHpTimer = 1;
+
+    [SerializeField] GameObject _Item;
 
     // Start is called before the first frame update
     void Start()
@@ -36,7 +40,11 @@ public class enemyMove : MonoBehaviour
             v.y = 0;
             transform.rotation = Quaternion.LookRotation(v);
         }
-        
+        if(_enemyHp <= 0)
+        {
+            Instantiate(_Item,this.gameObject.transform.position,this.gameObject.transform.rotation);
+            Destroy(this.gameObject);
+        }
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -44,13 +52,27 @@ public class enemyMove : MonoBehaviour
         {
             _animator.Play("UD_infantry_07_attack_A");
         }
-        
     }
     private void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
             _animator.Play("UD_infantry_05_combat_idle");
+        }
+    }
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            if (_enemyHpTimer > 1f)
+            {
+                _enemyHp -= 1;
+                _enemyHpTimer = 0f;
+            }
+            else
+            {
+                _enemyHpTimer += Time.deltaTime;
+            }
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -70,4 +92,5 @@ public class enemyMove : MonoBehaviour
             _isMove = false;
         }
     }
+
 }
