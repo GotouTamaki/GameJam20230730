@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [SerializeField] Text _text = null;
-    float _money = 0;
+    static float _money = 0;
 
     // Start is called before the first frame update
     void Start()

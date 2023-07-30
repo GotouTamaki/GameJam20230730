@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -14,9 +15,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _smooth = 10f;
     [SerializeField] float _rotationSpeed = 1.0f;
     [SerializeField] UIManager _uiManager = null;
+    [SerializeField] string _stageName = null;
     // 各種初期化
     Rigidbody _rb = default;
-    Animator _animator = default;   
+    Animator _animator = default;
+    CharacterState _state = CharacterState.Normal;
     Vector3 _latestPos = Vector3.zero;
     // x軸方向の入力値
     float _h = 0;
@@ -64,6 +67,26 @@ public class PlayerController : MonoBehaviour
             //_animator.SetFloat("Velocity", _moveSpeed);
         }
 
+        // 生死判定
+        if (_hp <= 0)
+        {
+            _state = CharacterState.Dead;
+        }
+
+        if (_state == CharacterState.Dead)
+        {
+            Debug.Log("やられた！");
+            //if (倒されたとき用のプレハブ)
+            //{
+            //    Instantiate(倒されたとき用のプレハブ, this.transform.position, 倒されたとき用のプレハブ.transform.rotation);
+            //}
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            _state = CharacterState.Normal;
+        }
+
         // 何も入力がない間は _elapsed の経過時間を増やす
         _elapsed += Time.deltaTime;
         if (_v != 0 || _h != 0) 
@@ -87,6 +110,11 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.LookRotation(moveForward * _rotationSpeed);
         }
     }
+    public enum CharacterState
+    {
+        Normal,
+        Dead,
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -94,6 +122,10 @@ public class PlayerController : MonoBehaviour
         {
             _uiManager.Money++;
             Destroy(other.gameObject);
+        }
+        else if (other.gameObject.tag == "Finish")
+        {
+            SceneManager.LoadScene(_stageName);
         }
     }
 }
